@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset='utf-8'>
+    <title>RMK vaatamisväärsuste kaart</title>
+    <link rel=stylesheet href='styles.css'>
+    <script src='data.json'></script>
+</head>
+
+<body>
+    <h1>RMK vaatamisväärsuste kaart</h1>
+    <div id='map-wrapper'>
+        <div id='map-canvas' class='mapping'></div>
+    </div>
+
+<script>
+
+function initialize() {
+    var map;
+    var bounds = new google.maps.LatLngBounds();
+    var mapOptions = {
+        mapTypeId: 'roadmap'
+        };
+        
+    // Display a map on the page
+    map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+    map.setTilt(45);
+    
+    // Initialize Spiderfier
+    var omsOptions = {
+        markersWontMove: true,
+        markersWontHide: true,
+        basicFormatEvents: true,
+        keepSpiderfied: true,
+    };
+    
+    var oms = new OverlappingMarkerSpiderfier(map, omsOptions);
+    
+    // Define marker icons for different site types
+    var icons = ['/images/ico_fireplace.png',
+            '/images/ico_house3.png',
+            '/images/ico_walker3.png',
+            '/images/ico_camping.png',
+            '/images/ico_camping.png'];
+
+    
+    // Load markers into array from data.json
+    var markers = [];
+    for (var i = 0; i < sites.length; i++) {
+        var icon;
+        switch (sites[i].type) {
+            case 'Lõkkekoht':
+                icon = icons[0];
+                break;
+            case 'Metsaonn':
+                icon = icons[1];
+                break;
+            case 'Metsamaja':
+                icon = icons[1];
+                break;
+            case 'Matkarada':
+                icon = icons[2];
+                break;
+            case 'Õpperada':
+                icon = icons[2];
+                break;
+            case 'Telkimisala':
+                icon = icons[3];
+                break;
+            default:
+                icon = icons[4];
+        }
+        markers.push([sites[i].name, sites[i].latitude, sites[i].longitude, icon]);
+//        console.log(icon);
+    }
+    
+//    console.log(markers.length);
+        
+    // Load info window content into array from data.json
+    var infoWindowContent = [];
+    for (var i = 0; i < markers.length; i++) {
+//        console.log(sites[i].name);
+        infoWindowContent.push(['<div id="iw-container"><div class="iw-heading"><h3 class="iw-heading"><a href="' + sites[i].link + '">' + sites[i].name + '</a></h3></div>' +
+                                '<div class="iw-type"><span>' + sites[i].type + '</span></div>' +
+                                '<div class="iw-image"><img src="' + sites[i].img_link + '" width="96" height="96" alt=""></div>' +
+                                '<div class="iw-text"><p class="iw-text">' + sites[i].desc + '</p></div></div>']);
+    }
+        
+    // Display multiple markers on a map
+    var infoWindow = new google.maps.InfoWindow(), marker, i;
+    
+    // Loop through our array of markers and place each one on the map  
+    for (i = 0; i < markers.length; i++) {
+        var position = new google.maps.LatLng(markers[i][1], markers[i][2]);
+        bounds.extend(position);
+        marker = new google.maps.Marker({
+            position: position,
+            title: markers[i][0],
+            icon: markers[i][3]
+        });
+        
+        // Allow each marker to have an info window    
+        google.maps.event.addListener(marker, 'spider_click', (function(marker, i) {
+            return function() {
+                infoWindow.setContent(infoWindowContent[i][0]);
+                infoWindow.open(map, marker);
+            }
+        })(marker, i));
+        
+        // Place on marker on Spiderfier and map.
+        oms.addMarker(marker);
+        
+        // Automatically center the map fitting all markers on the screen
+        map.fitBounds(bounds);
+    }
+
+    // Override our map zoom level once our fitBounds function runs (Make sure it only runs once)
+    var boundsListener = google.maps.event.addListener((map), 'bounds_changed', function(event) {
+        this.setZoom(8);
+        google.maps.event.removeListener(boundsListener);
+    });
+}
+
+</script>
+<script async defer src='js/oms.min.js?spiderfier_callback=mapLibReadyHandler'></script>
+<script async defer src='//maps.googleapis.com/maps/api/js?sensor=false&callback=initialize'></script>
+</body>
