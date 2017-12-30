@@ -37,11 +37,11 @@ function initialize() {
     var oms = new OverlappingMarkerSpiderfier(map, omsOptions);
     
     // Define marker icons for different site types
-    var icons = ['/images/ico_fireplace.png',
-            '/images/ico_house3.png',
-            '/images/ico_walker3.png',
-            '/images/ico_camping.png',
-            '/images/ico_camping.png'];
+    var icons = ['images/ico_fireplace.png',
+            'images/ico_house3.png',
+            'images/ico_walker3.png',
+            'images/ico_camping.png',
+            'images/ico_camping.png'];
 
     
     // Load markers into array from data.json
@@ -123,5 +123,5 @@ function initialize() {
 
 </script>
 <script async defer src='js/oms.min.js?spiderfier_callback=mapLibReadyHandler'></script>
-<script async defer src='//maps.googleapis.com/maps/api/js?sensor=false&callback=initialize'></script>
+<script async defer src='//maps.googleapis.com/maps/api/js?key=AIzaSyAxlzDkiBr7t2cXvREScozsbH7UOOozxKU&sensor=false&callback=initialize'></script>
 </body>
