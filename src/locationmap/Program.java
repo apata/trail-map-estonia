@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -30,7 +31,7 @@ public class Program {
 		
 //		Create data file to save results in
 		Charset charset = Charset.forName("UTF-8");
-		Path output = Paths.get("/Users/arturpata/Google Drive/Java/RMKLocation/html/data.json");
+		Path output = FileSystems.getDefault().getPath("html", "data.json");
 		BufferedWriter writer = Files.newBufferedWriter(output, charset);
 		
 //		Write data file beginning
