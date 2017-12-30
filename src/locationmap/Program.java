@@ -30,7 +30,7 @@ public class Program {
 		
 //		Create data file to save results in
 		Charset charset = Charset.forName("UTF-8");
-		Path output = FileSystems.getDefault().getPath("html", "data.json");
+		Path output = FileSystems.getDefault().getPath("docs", "data.json");
 		BufferedWriter writer = Files.newBufferedWriter(output, charset);
 		
 //		Write data file beginning
