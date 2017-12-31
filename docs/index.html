@@ -32,45 +32,68 @@ function initialize() {
         markersWontHide: true,
         basicFormatEvents: true,
         keepSpiderfied: true,
+        nearbyDistance: 40
     };
     
     var oms = new OverlappingMarkerSpiderfier(map, omsOptions);
     
     // Define marker icons for different site types
-    var icons = ['images/ico_fireplace.png',
-            'images/ico_house3.png',
-            'images/ico_walker3.png',
-            'images/ico_camping.png',
-            'images/ico_camping.png'];
-
+    var icons = ['images/ico_fire.png',
+            'images/ico_house.png',
+            'images/ico_walk.png',
+            'images/ico_tent.png',
+            'images/ico_rest.png',
+            'images/ico_tower.png',
+            'images/ico_bike.png',
+            'images/ico_orange.png'];
     
+    // Define complex marker icon and size
+    var icon = {
+        size: new google.maps.Size(29, 36),
+        origin: new google.maps.Point(0, 0),
+        anchor: new google.maps.Point(14, 35)};
+  
+    // Define complex marker clickable area
+    var shape = {coords: [14, 36, 0, 17, 0, 10, 5, 3, 14, 0, 23, 3, 28, 10, 28, 17],
+                type: 'poly'};
+
     // Load markers into array from data.json
     var markers = [];
+    
     for (var i = 0; i < sites.length; i++) {
-        var icon;
+        var icon_url;
         switch (sites[i].type) {
             case 'Lõkkekoht':
-                icon = icons[0];
+                icon_url = icons[0];
                 break;
             case 'Metsaonn':
-                icon = icons[1];
+                icon_url = icons[1];
                 break;
             case 'Metsamaja':
-                icon = icons[1];
+                icon_url = icons[1];
                 break;
             case 'Matkarada':
-                icon = icons[2];
+                icon_url = icons[2];
                 break;
             case 'Õpperada':
-                icon = icons[2];
+                icon_url = icons[2];
                 break;
             case 'Telkimisala':
-                icon = icons[3];
+                icon_url = icons[3];
+                break;
+            case 'Puhkekoht':
+                icon_url = icons[4];
+                break;
+            case 'Vaatetorn':
+                icon_url = icons[5];
+                break;
+            case 'Rattarada':
+                icon_url = icons[6];
                 break;
             default:
-                icon = icons[4];
+                icon_url = icons[6];
         }
-        markers.push([sites[i].name, sites[i].latitude, sites[i].longitude, icon]);
+        markers.push([sites[i].name, sites[i].latitude, sites[i].longitude, icon_url]);
 //        console.log(icon);
     }
     
@@ -93,10 +116,13 @@ function initialize() {
     for (i = 0; i < markers.length; i++) {
         var position = new google.maps.LatLng(markers[i][1], markers[i][2]);
         bounds.extend(position);
+        icon.url = markers[i][3];
         marker = new google.maps.Marker({
             position: position,
             title: markers[i][0],
-            icon: markers[i][3]
+//            label: markers[i][0][0],
+            icon: icon,
+            shape: shape
         });
         
         // Allow each marker to have an info window    
