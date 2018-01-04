@@ -5,21 +5,50 @@
     <title>RMK vaatamisväärsuste kaart</title>
     <link rel=stylesheet href='styles.css'>
     <script src='data.json'></script>
+    <script src='js/jquery-3.2.1.min.js'></script>
 </head>
 
 <body>
-    <h1>RMK vaatamisväärsuste kaart</h1>
+    <div id='heading-div'><h1>RMK vaatamisväärsuste kaart</h1></div>
+    <div id='filter-buttons'>
+        <input id= "fb-toggle-all" class="filter-button fb-active" onclick='toggleAllMarkers();' type='button' value='Peida kõik'>
+    </div>
     <div id='map-wrapper'>
         <div id='map-canvas' class='mapping'></div>
     </div>
 
 <script>
 
+// Defines site types
+var siteTypes = ['Matkarada', 'Õpperada', 'Külastuskeskus', 'Loodusmaja', 'Lõkkekoht', 'Telkimisala', 'Puhkekoht', 'Vaatetorn', 'Metsamaja', 'Metsaonn', 'Rattarada', 'Maastikusõidurada', 'Teabepunkt', 'Muu'];
+
+// Defines marker icons for different site types
+var icons = ['images/ico_walk.png', 'images/ico_walk.png', 'images/ico_orange.png', 'images/ico_orange.png', 'images/ico_fire.png', 'images/ico_tent.png', 'images/ico_rest.png', 'images/ico_tower.png', 'images/ico_house.png', 'images/ico_house.png', 'images/ico_bike.png', 'images/ico_orange.png', 'images/ico_orange.png', 'images/ico_orange.png']
+
+// Adds filter buttons under title when document is ready.
+$( document ).ready(function() {
+    console.log( "ready!" );
+    var buttonDiv = $('#filter-buttons');
+    
+    var buttonHtml = [];
+    for (var i = 0; i < siteTypes.length; i++) {
+        buttonHtml.push('<input class="filter-button fb-active" id="fb-' + siteTypes[i] + '" onclick="toggleMarkersByType(\'' + siteTypes[i] + '\');" type="button" value="' + siteTypes[i] + '"> ');
+    }
+    
+    buttonDiv.append(buttonHtml.join(""));
+});
+
+var markers = [];
+//var infoContent = [];
+var map, oms;
+
 function initialize() {
-    var map;
     var bounds = new google.maps.LatLngBounds();
+    var center = {lat: 58.883333, lng: 25.557222};
     var mapOptions = {
-        mapTypeId: 'roadmap'
+        mapTypeId: 'roadmap',
+        zoom: 8,
+        center: center
         };
         
     // Display a map on the page
@@ -29,23 +58,13 @@ function initialize() {
     // Initialize Spiderfier
     var omsOptions = {
         markersWontMove: true,
-        markersWontHide: true,
+        markersWontHide: false,
         basicFormatEvents: true,
         keepSpiderfied: true,
-        nearbyDistance: 40
+        nearbyDistance: 30
     };
     
-    var oms = new OverlappingMarkerSpiderfier(map, omsOptions);
-    
-    // Define marker icons for different site types
-    var icons = ['images/ico_fire.png',
-            'images/ico_house.png',
-            'images/ico_walk.png',
-            'images/ico_tent.png',
-            'images/ico_rest.png',
-            'images/ico_tower.png',
-            'images/ico_bike.png',
-            'images/ico_orange.png'];
+    oms = new OverlappingMarkerSpiderfier(map, omsOptions);
     
     // Define complex marker icon and size
     var icon = {
@@ -57,97 +76,123 @@ function initialize() {
     var shape = {coords: [14, 36, 0, 17, 0, 10, 5, 3, 14, 0, 23, 3, 28, 10, 28, 17],
                 type: 'poly'};
 
-    // Load markers into array from data.json
-    var markers = [];
-    
+    // Load markers into array from data.json    
     for (var i = 0; i < sites.length; i++) {
-        var icon_url;
-        switch (sites[i].type) {
-            case 'Lõkkekoht':
-                icon_url = icons[0];
-                break;
-            case 'Metsaonn':
-                icon_url = icons[1];
-                break;
-            case 'Metsamaja':
-                icon_url = icons[1];
-                break;
-            case 'Matkarada':
-                icon_url = icons[2];
-                break;
-            case 'Õpperada':
-                icon_url = icons[2];
-                break;
-            case 'Telkimisala':
-                icon_url = icons[3];
-                break;
-            case 'Puhkekoht':
-                icon_url = icons[4];
-                break;
-            case 'Vaatetorn':
-                icon_url = icons[5];
-                break;
-            case 'Rattarada':
-                icon_url = icons[6];
-                break;
-            default:
-                icon_url = icons[7];
+        var site = sites[i];
+        // Find correct icon according to type
+        if (siteTypes.indexOf(site.site_type) === -1) {
+            icon.url = icons[13];
+        } else {
+            icon.url = icons[siteTypes.indexOf(site.site_type)];
         }
-        markers.push([sites[i].name, sites[i].latitude, sites[i].longitude, icon_url]);
-//        console.log(icon);
-    }
-    
-//    console.log(markers.length);
         
-    // Load info window content into array from data.json
-    var infoWindowContent = [];
-    for (var i = 0; i < markers.length; i++) {
-//        console.log(sites[i].name);
-        infoWindowContent.push(['<div id="iw-container"><div class="iw-heading"><h3 class="iw-heading"><a href="' + sites[i].link + '">' + sites[i].name + '</a></h3></div>' +
-                                '<div class="iw-type"><span>' + sites[i].type + '</span></div>' +
-                                '<div class="iw-image"><img src="' + sites[i].img_link + '" width="96" height="96" alt=""></div>' +
-                                '<div class="iw-text"><p class="iw-text">' + sites[i].desc + '</p></div></div>']);
-    }
-        
-    // Display multiple markers on a map
-    var infoWindow = new google.maps.InfoWindow(), marker, i;
-    
-    // Loop through our array of markers and place each one on the map  
-    for (i = 0; i < markers.length; i++) {
-        var position = new google.maps.LatLng(markers[i][1], markers[i][2]);
-        bounds.extend(position);
-        icon.url = markers[i][3];
-        marker = new google.maps.Marker({
+        // Create marker        
+        var position = new google.maps.LatLng(site.latitude, site.longitude);
+        var marker = new google.maps.Marker({
             position: position,
-            title: markers[i][0],
-//            label: markers[i][0][0],
+            title: site.name,
             icon: icon,
             shape: shape
         });
         
-        // Allow each marker to have an info window    
+        // Create info window content
+        var info = '<div id="iw-container"><div class="iw-heading"><h3 class="iw-heading"><a href="' + site.link + '">' + site.name + '</a></h3></div>' + 
+                '<div class="iw-type"><span>' + site.site_type + '</span></div>' +
+                '<div class="iw-image"><img src="' + site.img_link + '" width="96" height="96" alt=""></div>' +
+                '<div class="iw-text"><p class="iw-text">' + site.desc + '</p></div></div>';
+
+        marker.infoContent = info;
+        
+        // Add site type info to marker
+        marker.siteType = site.site_type;
+        
+        // Add marker to array
+        markers.push(marker);
+                
+        // Close infowindow when user clicks on map
+        var infoWindow = new google.maps.InfoWindow(); 
+        function iwClose() {infoWindow.close();}
+        google.maps.event.addListener(map, 'click', iwClose);
+
+        // Create click listeners for markers, display infowindow on click   
         google.maps.event.addListener(marker, 'spider_click', (function(marker, i) {
             return function() {
-                infoWindow.setContent(infoWindowContent[i][0]);
+                infoWindow.setContent(marker.infoContent);
                 infoWindow.open(map, marker);
             }
         })(marker, i));
-        
-        // Place on marker on Spiderfier and map.
-        oms.addMarker(marker);
-        
-        // Automatically center the map fitting all markers on the screen
-        map.fitBounds(bounds);
-    }
-
-    // Override our map zoom level once our fitBounds function runs (Make sure it only runs once)
-    var boundsListener = google.maps.event.addListener((map), 'bounds_changed', function(event) {
-        this.setZoom(8);
-        google.maps.event.removeListener(boundsListener);
-    });
+    }       
+    
+    // Adds all markers to map on initialize 
+    addAllMarkers(oms);
 }
+
+// Loop through our array of markers and place each one on the map  
+function addAllMarkers(oms) {
+    for (var i = 0; i < markers.length; i++) {        
+        oms.addMarker(markers[i]);
+    }
+    console.log('Adding all markers.');
+}
+
+// Toggle all markers and buttons
+function toggleAllMarkers() {
+    // Find buttons to change style
+    var toggleButton = $('#fb-toggle-all');
+    var filterButtons = $('.filter-button');
+    var toggle;
+    
+    // Change all buttons style when Toggle All pressed
+    if (toggleButton.hasClass('fb-active')) {
+        toggleButton.addClass('fb-deact');
+        filterButtons.addClass('fb-deact');
+        toggleButton.removeClass('fb-active');
+        filterButtons.removeClass('fb-active');
+        toggleButton.attr('value', 'Näita kõik');
+        toggle = null;
+        console.log('Hiding all markers');
+    } else {
+        toggleButton.addClass('fb-active');
+        filterButtons.addClass('fb-active');
+        toggleButton.removeClass('fb-deact');
+        filterButtons.removeClass('fb-deact');
+        toggleButton.attr('value', 'Peida kõik');
+        toggle = map;
+        console.log('Showing all markers');
+    }
+    
+    // Loop through markers, display or disable all
+    for (var i = 0; i < markers.length; i++) {
+        markers[i].setMap(toggle);
+    }
+}
+
+// Toggle markers on map by their type
+function toggleMarkersByType(siteType) {
+    // Change button style when filter enabled/disabled
+    var button = $('#fb-' + siteType);
+    var toggle;
+    if (button.hasClass('fb-active')) {
+        button.addClass('fb-deact');
+        button.removeClass('fb-active');
+        toggle = null;
+        console.log('Hiding markers by type: ' + siteType);
+    } else {
+        button.addClass('fb-active');
+        button.removeClass('fb-deact');
+        toggle = map;
+        console.log('Showing markers by type: ' + siteType);
+    }
+    
+    // Loop through markers, toggle display on map if type matches
+    for (var i = 0; i < markers.length; i++) {
+        if (markers[i].siteType == siteType) {
+            markers[i].setMap(toggle);
+        }
+    }
+}    
 
 </script>
 <script async defer src='js/oms.min.js?spiderfier_callback=mapLibReadyHandler'></script>
-<script async defer src='//maps.googleapis.com/maps/api/js?key=AIzaSyAxlzDkiBr7t2cXvREScozsbH7UOOozxKU&sensor=false&callback=initialize'></script>
+<script async defer src='//maps.googleapis.com/maps/api/js?key=AIzaSyAxlzDkiBr7t2cXvREScozsbH7UOOozxKU&callback=initialize'></script>
 </body>
