@@ -39,9 +39,13 @@ $( document ).ready(function() {
 });
 
 var markers = [];
+var markerInfo = [];
 var map, oms;
 
+var mapLibsReady = 0;
 function initialize() {
+    if (++ mapLibsReady < 2) return;
+    
     var bounds = new google.maps.LatLngBounds();
     var center = {lat: 58.883333, lng: 25.557222};
     var mapOptions = {
@@ -91,9 +95,7 @@ function initialize() {
             position: position,
             title: site.name,
             icon: icon,
-            shape: shape,
-            info: "",
-            siteType: ""
+            shape: shape
         });
         
         // Create info window content
@@ -101,11 +103,9 @@ function initialize() {
                 '<div class="iw-type"><span>' + site.site_type + '</span></div>' +
                 '<div class="iw-image"><img src="' + site.img_link + '" width="96" height="96" alt=""></div>' +
                 '<div class="iw-text"><p class="iw-text">' + site.desc + '</p></div></div>';
-
-        marker.infoContent = info;
         
-        // Add site type to marker
-        marker.siteType = site.site_type;
+        // Add site type and type to markerInfo
+        markerInfo.push([site.site_type, info]);
         
         // Add marker to array
         markers.push(marker);
@@ -118,7 +118,7 @@ function initialize() {
         // Create click listeners for markers, display infowindow on click   
         google.maps.event.addListener(marker, 'spider_click', (function(marker, i) {
             return function() {
-                infoWindow.setContent(marker.infoContent);
+                infoWindow.setContent(markerInfo[i][1]);
                 infoWindow.open(map, marker);
             }
         })(marker, i));
@@ -126,14 +126,15 @@ function initialize() {
     
     // Adds all markers to map on initialize 
     addAllMarkers(oms);
+    
+    // Loop through our array of markers and place each one on the map  
+    function addAllMarkers(oms) {
+        for (var i = 0; i < markers.length; i++) {        
+            oms.addMarker(markers[i]);
+        }
+        console.log('Adding all markers.');
 }
 
-// Loop through our array of markers and place each one on the map  
-function addAllMarkers(oms) {
-    for (var i = 0; i < markers.length; i++) {        
-        oms.addMarker(markers[i]);
-    }
-    console.log('Adding all markers.');
 }
 
 // Toggle all markers and buttons
@@ -187,13 +188,13 @@ function toggleMarkersByType(siteType) {
     
     // Loop through markers, toggle display on map if type matches
     for (var i = 0; i < markers.length; i++) {
-        if (markers[i].siteType == siteType) {
+        if (markerInfo[i][0] == siteType) {
             markers[i].setMap(toggle);
         }
     }
 }    
 
 </script>
-<script async defer src='js/oms.min.js?spiderfier_callback=mapLibReadyHandler'></script>
 <script async defer src='//maps.googleapis.com/maps/api/js?key=AIzaSyAxlzDkiBr7t2cXvREScozsbH7UOOozxKU&callback=initialize'></script>
+<script async defer src='js/oms.min.js?spiderfier_callback=initialize'></script>
 </body>
