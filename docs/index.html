@@ -1,200 +1,264 @@
 <!DOCTYPE html>
 
 <head>
-    <meta charset='utf-8'>
-    <title>RMK vaatamisväärsuste kaart</title>
-    <link rel=stylesheet href='styles.css'>
-    <script src='data.json'></script>
-    <script src='js/jquery-3.2.1.min.js'></script>
+  <meta charset="utf-8" />
+  <title>RMK vaatamisväärsuste kaart</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+    crossorigin=""
+  />
+  <script src="data.json"></script>
+  <script src="js/jquery-3.2.1.min.js"></script>
 </head>
 
 <body>
-    <div id='heading-div'><h1>RMK vaatamisväärsuste kaart</h1></div>
-    <div id='filter-buttons'>
-        <input id= "fb-toggle-all" class="filter-button fb-active" onclick='toggleAllMarkers();' type='button' value='Peida kõik'>
+  <div id="map-wrapper">
+    <div id="header">
+      <h1>RMK vaatamisväärsuste kaart</h1>
+      <div id="filter-buttons">
+        <input
+          id="fb-toggle-all"
+          class="filter-button fb-active"
+          onclick="toggleAllMarkers();"
+          type="button"
+          value="Peida kõik"
+        />
+      </div>
     </div>
-    <div id='map-wrapper'>
-        <div id='map-canvas' class='mapping'></div>
-    </div>
 
-<script>
+    <div id="mapid" class="mapping"></div>
+  </div>
 
-// Defines site types
-var siteTypes = ['Matkarada', 'Õpperada', 'Külastuskeskus', 'Loodusmaja', 'Lõkkekoht', 'Telkimisala', 'Puhkekoht', 'Vaatetorn', 'Metsamaja', 'Metsaonn', 'Rattarada', 'Maastikusõidurada', 'Teabepunkt', 'Muu'];
+  <script>
+    // Defines site types
+    var siteTypes = [
+      "Matkarada",
+      "Õpperada",
+      "Külastuskeskus",
+      "Loodusmaja",
+      "Lõkkekoht",
+      "Telkimisala",
+      "Puhkekoht",
+      "Vaatetorn",
+      "Metsamaja",
+      "Metsaonn",
+      "Rattarada",
+      "Maastikusõidurada",
+      "Teabepunkt",
+      "Muu",
+    ];
 
-// Defines marker icons for different site types
-var icons = ['images/ico_walk_n.png', 'images/ico_walk_n.png', 'images/ico_info_n.png', 'images/ico_info_n.png', 'images/ico_fire_n.png', 'images/ico_camp_n.png', 'images/ico_rest_n.png', 'images/ico_tower_n.png', 'images/ico_housekey_n.png', 'images/ico_house_n.png', 'images/ico_bike_n.png', 'images/ico_basic_orange_n.png', 'images/ico_info_n.png', 'images/ico_basic_orange_n.png']
+    // Defines marker icons for different site types
+    var icons = [
+      "images/ico_walk_n.png",
+      "images/ico_walk_n.png",
+      "images/ico_info_n.png",
+      "images/ico_info_n.png",
+      "images/ico_fire_n.png",
+      "images/ico_camp_n.png",
+      "images/ico_rest_n.png",
+      "images/ico_tower_n.png",
+      "images/ico_housekey_n.png",
+      "images/ico_house_n.png",
+      "images/ico_bike_n.png",
+      "images/ico_basic_orange_n.png",
+      "images/ico_info_n.png",
+      "images/ico_basic_orange_n.png",
+    ];
 
-// Adds filter buttons under title when document is ready.
-$( document ).ready(function() {
-    console.log( "ready!" );
-    var buttonDiv = $('#filter-buttons');
-    
-    var buttonHtml = [];
-    for (var i = 0; i < siteTypes.length; i++) {
-        buttonHtml.push('<input class="filter-button fb-active" id="fb-' + siteTypes[i] + '" onclick="toggleMarkersByType(\'' + siteTypes[i] + '\');" type="button" value="' + siteTypes[i] + '"> ');
-    }
-    
-    buttonDiv.append(buttonHtml.join(""));
-});
+    // Adds filter buttons under title when document is ready.
+    $(document).ready(function () {
+      console.log("ready!");
+      var buttonDiv = $("#filter-buttons");
 
-var markers = [];
-var markerInfo = [];
-var map, oms;
+      var buttonHtml = [];
+      for (var i = 0; i < siteTypes.length; i++) {
+        buttonHtml.push(
+          '<input class="filter-button fb-active" id="fb-' +
+            siteTypes[i] +
+            '" onclick="toggleMarkersByType(\'' +
+            siteTypes[i] +
+            '\');" type="button" value="' +
+            siteTypes[i] +
+            '"> '
+        );
+      }
 
-var mapLibsReady = 0;
-function initialize() {
-    if (++ mapLibsReady < 2) return;
-    
-    var bounds = new google.maps.LatLngBounds();
-    var center = {lat: 58.883333, lng: 25.557222};
-    var mapOptions = {
-        mapTypeId: 'roadmap',
+      buttonDiv.append(buttonHtml.join(""));
+    });
+
+    var markers = [];
+    var markerInfo = [];
+    var map, oms;
+
+    var mapLibsReady = 0;
+    function initialize() {
+      // var crs = new L.Proj.CRS(
+      //   "EPSG:3301",
+      //     "+proj=lcc +lat_1=59.33333333333334 +lat_2=58 +lat_0=57.51755393055556 +lon_0=24 +x_0=500000 " +
+      //     "+y_0 =6375000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      //   {
+      //     resolutions: [2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5],
+      //   }
+      // );
+
+      var crs = new L.Proj.CRS('EPSG:3301', '+proj=lcc +lat_1=59.33333333333334 +lat_2=58 +lat_0=57.51755393055556 +lon_0=24 +x_0=500000 +y_0=6375000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs', {
+			resolutions: [
+				2048, 1024, 512, 256, 128,
+				64, 32, 16, 8, 4, 2, 1, 0.5
+			]
+		});
+
+
+      var center = [58.883333, 25.557222];
+      var mapOptions = {
         zoom: 8,
-        center: center
-        };
-        
-    // Display a map on the page
-    map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
-    map.setTilt(45);
-    
-    // Initialize Spiderfier
-    var omsOptions = {
-        markersWontMove: true,
-        markersWontHide: false,
-        basicFormatEvents: true,
-        keepSpiderfied: true,
-        nearbyDistance: 30
-    };
-    
-    oms = new OverlappingMarkerSpiderfier(map, omsOptions);
-    
-    // Define complex marker icon and size
-    var icon = {
-        size: new google.maps.Size(29, 36),
-        origin: new google.maps.Point(0, 0),
-        anchor: new google.maps.Point(14, 35)};
-  
-    // Define complex marker clickable area
-    var shape = {coords: [14, 36, 0, 17, 0, 10, 5, 3, 14, 0, 23, 3, 28, 10, 28, 17],
-                type: 'poly'};
+        center: center,
+      };
 
-    // Load markers into array from data.json    
-    for (var i = 0; i < sites.length; i++) {
+      // Display a map on the page
+      map = L.map("mapid", {crs: crs}).setView(center, 2);
+      // L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      //   attribution:
+      //     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      // }).addTo(map);
+      L.tileLayer
+        .wms("https://kaart.maaamet.ee/wms/fotokaart", {
+          layers: "MA-FOTOKAART",
+          continuousWorld: true,
+          attribution: "&copy; Maa-amet",
+        })
+        .addTo(map);
+
+      //     // Define complex marker icon and size
+      var iconOptions = {
+        iconSize: [29, 36],
+        iconAnchor: [14, 35],
+      };
+
+      //     // Define complex marker clickable area
+      //     var shape = {coords: [14, 36, 0, 17, 0, 10, 5, 3, 14, 0, 23, 3, 28, 10, 28, 17],
+      //                 type: 'poly'};
+
+      //     // Load markers into array from data.json
+      for (var i = 0; i < sites.length; i++) {
         var site = sites[i];
         // Find correct icon according to type
         if (siteTypes.indexOf(site.site_type) === -1) {
-            icon.url = icons[13];
+          iconOptions.iconUrl = icons[13];
         } else {
-            icon.url = icons[siteTypes.indexOf(site.site_type)];
+          iconOptions.iconUrl = icons[siteTypes.indexOf(site.site_type)];
         }
-        
-        // Create marker        
-        var position = new google.maps.LatLng(site.latitude, site.longitude);
-        var marker = new google.maps.Marker({
-            position: position,
-            title: site.name,
-            icon: icon,
-            shape: shape
-        });
-        
+
         // Create info window content
-        var info = '<div id="iw-container"><div class="iw-heading"><h3 class="iw-heading"><a href="' + site.link + '">' + site.name + '</a></h3></div>' + 
-                '<div class="iw-type"><span>' + site.site_type + '</span></div>' +
-                '<div class="iw-image"><img src="' + site.img_link + '" width="96" height="96" alt=""></div>' +
-                '<div class="iw-text"><p class="iw-text">' + site.desc + '</p></div></div>';
-        
-        // Add site type and type to markerInfo
-        markerInfo.push([site.site_type, info]);
-        
-        // Add marker to array
+        var infoContent =
+          '<div id="iw-container"><div class="iw-heading"><h3 class="iw-heading"><a rel="noopener noreferrer" target="_blank" href="' +
+          site.link +
+          '">' +
+          site.name +
+          "</a></h3></div>" +
+          '<div class="iw-type"><span>' +
+          site.site_type +
+          "</span></div>" +
+          '<div class="iw-image"><img src="' +
+          site.img_link +
+          '" width="96" height="96" alt=""></div>' +
+          '<div class="iw-text"><p class="iw-text">' +
+          site.desc +
+          "</p></div></div>";
+
+        var marker = L.marker([site.latitude, site.longitude], {
+          title: site.name,
+          riseOnHover: true,
+          icon: L.icon(iconOptions),
+        })
+          .bindPopup(infoContent, {
+            className: "popup__offset",
+            autoPanPaddingTopLeft: [100, 100],
+          })
+          .addTo(map);
+
         markers.push(marker);
-                
-        // Close infowindow when user clicks on map
-        var infoWindow = new google.maps.InfoWindow(); 
-        function iwClose() {infoWindow.close();}
-        google.maps.event.addListener(map, 'click', iwClose);
+        markerInfo.push(site.site_type);
+      }
+    }
 
-        // Create click listeners for markers, display infowindow on click   
-        google.maps.event.addListener(marker, 'spider_click', (function(marker, i) {
-            return function() {
-                infoWindow.setContent(markerInfo[i][1]);
-                infoWindow.open(map, marker);
-            }
-        })(marker, i));
-    }       
-    
-    // Adds all markers to map on initialize 
-    addAllMarkers(oms);
-    
-    // Loop through our array of markers and place each one on the map  
-    function addAllMarkers(oms) {
-        for (var i = 0; i < markers.length; i++) {        
-            oms.addMarker(markers[i]);
+    // Toggle all markers and buttons
+    function toggleAllMarkers() {
+      // Find buttons to change style
+      var toggleButton = $("#fb-toggle-all");
+      var filterButtons = $(".filter-button");
+      var toggle;
+
+      // Change all buttons style when Toggle All pressed
+      if (toggleButton.hasClass("fb-active")) {
+        toggleButton.addClass("fb-deact");
+        filterButtons.addClass("fb-deact");
+        toggleButton.removeClass("fb-active");
+        filterButtons.removeClass("fb-active");
+        toggleButton.attr("value", "Näita kõik");
+        toggle = false;
+        console.log("Hiding all markers");
+      } else {
+        toggleButton.addClass("fb-active");
+        filterButtons.addClass("fb-active");
+        toggleButton.removeClass("fb-deact");
+        filterButtons.removeClass("fb-deact");
+        toggleButton.attr("value", "Peida kõik");
+        toggle = true;
+        console.log("Showing all markers");
+      }
+
+      // Loop through markers, display or disable all
+      for (var i = 0; i < markers.length; i++) {
+        if (toggle) {
+          markers[i].addTo(map);
+        } else {
+          markers[i].remove();
         }
-        console.log('Adding all markers.');
-}
-
-}
-
-// Toggle all markers and buttons
-function toggleAllMarkers() {
-    // Find buttons to change style
-    var toggleButton = $('#fb-toggle-all');
-    var filterButtons = $('.filter-button');
-    var toggle;
-    
-    // Change all buttons style when Toggle All pressed
-    if (toggleButton.hasClass('fb-active')) {
-        toggleButton.addClass('fb-deact');
-        filterButtons.addClass('fb-deact');
-        toggleButton.removeClass('fb-active');
-        filterButtons.removeClass('fb-active');
-        toggleButton.attr('value', 'Näita kõik');
-        toggle = null;
-        console.log('Hiding all markers');
-    } else {
-        toggleButton.addClass('fb-active');
-        filterButtons.addClass('fb-active');
-        toggleButton.removeClass('fb-deact');
-        filterButtons.removeClass('fb-deact');
-        toggleButton.attr('value', 'Peida kõik');
-        toggle = map;
-        console.log('Showing all markers');
+      }
     }
-    
-    // Loop through markers, display or disable all
-    for (var i = 0; i < markers.length; i++) {
-        markers[i].setMap(toggle);
-    }
-}
 
-// Toggle markers on map by their type
-function toggleMarkersByType(siteType) {
-    // Change button style when filter enabled/disabled
-    var button = $('#fb-' + siteType);
-    var toggle;
-    if (button.hasClass('fb-active')) {
-        button.addClass('fb-deact');
-        button.removeClass('fb-active');
-        toggle = null;
-        console.log('Hiding markers by type: ' + siteType);
-    } else {
-        button.addClass('fb-active');
-        button.removeClass('fb-deact');
-        toggle = map;
-        console.log('Showing markers by type: ' + siteType);
-    }
-    
-    // Loop through markers, toggle display on map if type matches
-    for (var i = 0; i < markers.length; i++) {
-        if (markerInfo[i][0] == siteType) {
-            markers[i].setMap(toggle);
+    // Toggle markers on map by their type
+    function toggleMarkersByType(siteType) {
+      // Change button style when filter enabled/disabled
+      var button = $("#fb-" + siteType);
+      var toggle;
+      if (button.hasClass("fb-active")) {
+        button.addClass("fb-deact");
+        button.removeClass("fb-active");
+        toggle = false;
+        console.log("Hiding markers by type: " + siteType);
+      } else {
+        button.addClass("fb-active");
+        button.removeClass("fb-deact");
+        toggle = true;
+        console.log("Showing markers by type: " + siteType);
+      }
+
+      // Loop through markers, toggle display on map if type matches
+      for (var i = 0; i < markers.length; i++) {
+        if (markerInfo[i] === siteType) {
+          if (toggle) {
+            markers[i].addTo(map);
+          } else {
+            markers[i].remove();
+          }
         }
+      }
     }
-}    
-
-</script>
-<script async defer src='//maps.googleapis.com/maps/api/js?key=AIzaSyAxlzDkiBr7t2cXvREScozsbH7UOOozxKU&callback=initialize'></script>
-<script async defer src='js/oms.min.js?spiderfier_callback=initialize'></script>
+  </script>
+  <script
+    src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+    integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+    crossorigin=""
+  ></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.6.3/proj4.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4leaflet/1.0.2/proj4leaflet.js"></script>
+  <script>
+    initialize();
+  </script>
 </body>
