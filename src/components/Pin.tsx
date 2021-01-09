@@ -17,7 +17,7 @@ const Pin = ({ position, pinType, title, children }: PinProps) => (
       iconUrl: getIconPathFromPinType(pinType),
       iconAnchor: [15, 36],
       iconSize: [29, 36],
-      popupAnchor: [0,- 31]
+      popupAnchor: [0, -31],
     })}
   >
     {children}
