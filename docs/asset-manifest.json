@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/trail-map-estonia/static/css/main.a7c5cd76.chunk.css",
-    "main.js": "/trail-map-estonia/static/js/main.a2b2ee10.chunk.js",
-    "main.js.map": "/trail-map-estonia/static/js/main.a2b2ee10.chunk.js.map",
+    "main.js": "/trail-map-estonia/static/js/main.c7107ffa.chunk.js",
+    "main.js.map": "/trail-map-estonia/static/js/main.c7107ffa.chunk.js.map",
     "runtime-main.js": "/trail-map-estonia/static/js/runtime-main.259d215b.js",
     "runtime-main.js.map": "/trail-map-estonia/static/js/runtime-main.259d215b.js.map",
     "static/js/2.3c22178b.chunk.js": "/trail-map-estonia/static/js/2.3c22178b.chunk.js",
@@ -17,6 +17,6 @@
     "static/js/runtime-main.259d215b.js",
     "static/js/2.3c22178b.chunk.js",
     "static/css/main.a7c5cd76.chunk.css",
-    "static/js/main.a2b2ee10.chunk.js"
+    "static/js/main.c7107ffa.chunk.js"
   ]
 }
