@@ -1,1 +1,1 @@
-declare module 'proj4';
+declare module "proj4";

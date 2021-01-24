@@ -1,22 +1,19 @@
 {
   "files": {
-    "main.css": "/trail-map-estonia/static/css/main.a7c5cd76.chunk.css",
-    "main.js": "/trail-map-estonia/static/js/main.c7107ffa.chunk.js",
-    "main.js.map": "/trail-map-estonia/static/js/main.c7107ffa.chunk.js.map",
-    "runtime-main.js": "/trail-map-estonia/static/js/runtime-main.259d215b.js",
-    "runtime-main.js.map": "/trail-map-estonia/static/js/runtime-main.259d215b.js.map",
-    "static/js/2.3c22178b.chunk.js": "/trail-map-estonia/static/js/2.3c22178b.chunk.js",
-    "static/js/2.3c22178b.chunk.js.map": "/trail-map-estonia/static/js/2.3c22178b.chunk.js.map",
-    "static/js/3.d1cbbae3.chunk.js": "/trail-map-estonia/static/js/3.d1cbbae3.chunk.js",
-    "static/js/3.d1cbbae3.chunk.js.map": "/trail-map-estonia/static/js/3.d1cbbae3.chunk.js.map",
+    "main.js": "/trail-map-estonia/static/js/main.97f9a418.chunk.js",
+    "main.js.map": "/trail-map-estonia/static/js/main.97f9a418.chunk.js.map",
+    "runtime-main.js": "/trail-map-estonia/static/js/runtime-main.30411bcc.js",
+    "runtime-main.js.map": "/trail-map-estonia/static/js/runtime-main.30411bcc.js.map",
+    "static/js/2.d780bdcc.chunk.js": "/trail-map-estonia/static/js/2.d780bdcc.chunk.js",
+    "static/js/2.d780bdcc.chunk.js.map": "/trail-map-estonia/static/js/2.d780bdcc.chunk.js.map",
+    "static/js/3.0df4de79.chunk.js": "/trail-map-estonia/static/js/3.0df4de79.chunk.js",
+    "static/js/3.0df4de79.chunk.js.map": "/trail-map-estonia/static/js/3.0df4de79.chunk.js.map",
     "index.html": "/trail-map-estonia/index.html",
-    "static/css/main.a7c5cd76.chunk.css.map": "/trail-map-estonia/static/css/main.a7c5cd76.chunk.css.map",
-    "static/js/2.3c22178b.chunk.js.LICENSE.txt": "/trail-map-estonia/static/js/2.3c22178b.chunk.js.LICENSE.txt"
+    "static/js/2.d780bdcc.chunk.js.LICENSE.txt": "/trail-map-estonia/static/js/2.d780bdcc.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
-    "static/js/runtime-main.259d215b.js",
-    "static/js/2.3c22178b.chunk.js",
-    "static/css/main.a7c5cd76.chunk.css",
-    "static/js/main.c7107ffa.chunk.js"
+    "static/js/runtime-main.30411bcc.js",
+    "static/js/2.d780bdcc.chunk.js",
+    "static/js/main.97f9a418.chunk.js"
   ]
 }
