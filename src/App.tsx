@@ -6,6 +6,7 @@ import theme from "./style/theme";
 import FilterOverlay from "./components/FilterOverlay";
 import GlobalStyle from "./style/GlobalStyle";
 import ResetStyle from "./style/ResetStyle";
+import FullScreenContainer from "./components/FullScreenContainer";
 
 const App = () => {
   // empty list means no filters: all are selected
@@ -30,19 +31,21 @@ const App = () => {
     <ThemeProvider theme={theme}>
       <ResetStyle />
       <GlobalStyle />
-      <TrailMap
-        sites={
-          selectedSiteTypes.length
-            ? sites.filter((s) => selectedSiteTypes.includes(s.site_type))
-            : sites
-        }
-      >
-        <FilterOverlay
-          toggleSiteType={toggleSiteType}
-          clearSelectedSiteTypes={clearSelectedSiteTypes}
-          selectedSiteTypes={selectedSiteTypes}
-        />
-      </TrailMap>
+      <FullScreenContainer>
+        <TrailMap
+          sites={
+            selectedSiteTypes.length
+              ? sites.filter((s) => selectedSiteTypes.includes(s.site_type))
+              : sites
+          }
+        >
+          <FilterOverlay
+            toggleSiteType={toggleSiteType}
+            clearSelectedSiteTypes={clearSelectedSiteTypes}
+            selectedSiteTypes={selectedSiteTypes}
+          />
+        </TrailMap>
+      </FullScreenContainer>
     </ThemeProvider>
   );
 };
