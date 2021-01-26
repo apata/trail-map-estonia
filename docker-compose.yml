@@ -1,0 +1,10 @@
+version: "3.9"
+
+services:
+  app:
+    image: node
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./:/usr/local/app
+    command: tail -F anything

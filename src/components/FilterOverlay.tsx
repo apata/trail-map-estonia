@@ -36,6 +36,7 @@ const FilterOverlay = ({
         </ClearButton>
         {Array.from(SITE_TYPES, ([siteType]) => (
           <FilterButton
+            key={siteType}
             onClick={() => toggleSiteType(siteType)}
             isSelected={selectedSiteTypes.includes(siteType)}
           >
